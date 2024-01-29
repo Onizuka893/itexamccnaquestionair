@@ -85,6 +85,10 @@
     button[type="submit"]:hover {
       background-color: #45a049;
     }
+    .score {
+      margin-top: 20px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -99,10 +103,16 @@
   <button onclick="nextQuestion()">Next Question</button>
 </div>
 
+<div>
+  <p id="score"></p>
+</div>
+
 <script>
 // Replace 'output.json' with the actual name of your JSON file
-const jsonFile = 'final.json';
+const jsonFile = '11-13.json';
+let score = 0;
 let correctAnswersTotal = 0;
+let gotWrong = false;
 
 let currentQuestionIndex = 0;
 let questions = [];
@@ -111,7 +121,7 @@ let questions = [];
 fetch(jsonFile)
   .then(response => response.json())
   .then(data => {
-    questions = data.sort(() => Math.random() - 0.5);
+    questions = data.sort(() => Math.random() - 0.5).slice(0, 30);
     displayQuestion();
   })
   .catch(error => console.error('Error loading JSON file:', error));
@@ -169,6 +179,7 @@ function checkAnswer(isCorrect, event) {
     document.getElementById('feedback').textContent = 'Correct! Well done.';
     setTimeout(nextQuestion, 1500); // Automatically go to the next question after 1.5 seconds
   } else {
+    gotWrong = true;
     clickedAnswer.style.backgroundColor = '#f44336';
     document.getElementById('feedback').textContent = 'Incorrect. Try again.';
   }
@@ -187,12 +198,19 @@ function checkAnswerMultiple(isCorrect, event) {
       setTimeout(nextQuestion, 1500); // Automatically go to the next question after 1.5 seconds
     }
   } else {
+    gotWrong = true;
     clickedAnswer.style.backgroundColor = '#f44336';
   }
 
 }
 
 function nextQuestion() {
+  if(gotWrong) {
+    gotWrong = false;
+  }
+  else {
+    score++;
+  }
   document.getElementById('multipleChoice').textContent = '';
   multipleChoice = false;
   correctAnswers = 0;
@@ -201,8 +219,12 @@ function nextQuestion() {
   console.log("reset");
   if (currentQuestionIndex < questions.length) {
     displayQuestion();
+    document.getElementById('score').textContent = 'Your score: ' + score.toString() + ' / ' + questions.length.toString();
+    document.getElementById('score').textContent += ' ' + Math.round(score / questions.length * 100).toString() + '%';
   } else {
     document.getElementById('quiz-container').innerHTML = '<h2>Quiz completed!</h2>';
+    document.getElementById('score').textContent = 'Your score: ' + score.toString() + ' / ' + questions.length.toString();
+    document.getElementById('score').textContent += ' ' + Math.round(score / questions.length * 100).toString() + '%';
   }
 }
 </script>
